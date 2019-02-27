@@ -1,6 +1,8 @@
 package com.turwoo.skilpaddev2;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 
 public class Turtle {
     private int speed; //speed the turtle will move at
@@ -18,12 +20,13 @@ public class Turtle {
     //            int length: Turtle length
     //            int speed: Turtle speed
     //returns: none
-    public Turtle(int x, int y, int height, int length, int speed){
+    public Turtle(Bitmap bm, int x, int y, int height, int length, int speed){
         this.x = x;
         this.y = y;
         this.height = height;
         this.length = length;
         this.speed = speed;
+        this.bm = Bitmap.createScaledBitmap(bm, length, height, false);
     }
 
     //START Accessor Methods
@@ -38,7 +41,12 @@ public class Turtle {
     //Purpose: moves the Turtle left and right
     //Parameters: int dir: -1 or 1 to decide direction of the movement
     //Returns: nothing
-    public void move(int dir){
+    public void move(Game g, double dir){
+        if(dir>0){ //makes the turtle face the direction it is moving
+           this.bm = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(g.getResources(), R.drawable.turtle_r), length, height, false);
+        }else{
+            this.bm =Bitmap.createScaledBitmap(BitmapFactory.decodeResource(g.getResources(), R.drawable.turtle_l), length, height, false);
+        }
         this.x += dir*this.speed;
     }
 
@@ -47,4 +55,14 @@ public class Turtle {
     //Parameter: int change: the amount to add to speed
     //returns: nothing
     public void changeSpeed(int change){ this.speed += change; }
+
+    //Function: collecting (Item)
+    //Purpose: detects if the turtle is collecting (touching) an item
+    //Parameters: Item it: item to check if it is collecting
+    //Returns: true if it is touching the item, else false
+    public boolean collecting(Item it){
+        Rect itR = new Rect(it.getX(), it.getY(), it.getX()+it.getHeight(), it.getY()+it.getHeight());
+        Rect TurtR = new Rect(this.x,this.y,this.x+this.length,this.y+this.height);
+        return TurtR.intersect(itR);
+    }
 }

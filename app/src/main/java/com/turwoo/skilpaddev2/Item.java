@@ -9,6 +9,7 @@ public class Item {
     private int speed; //speed the item falls at
     private Bitmap bm; //Bitmap for the item
     private Runnable action; //function to be called when the item is interacted with
+    boolean lossIfMissed;
 
     //Function: Item(int, int, int, int, Bitmap, Runnable)
     //Purpose: constructor
@@ -19,13 +20,14 @@ public class Item {
     //            Bitmap bm = Bitmap for the item
     //            Runnable action = function to run when the item is interacted with
     //returns: none
-    public Item(int x, int y, int height, int speed, Bitmap bm, Runnable action){
+    public Item(int x, int y, int height, int speed, Bitmap bm, Runnable action, boolean lossIfMissed){
         this.x = x;
         this.y = y;
         this.height = height;
         this.speed = speed;
-        this.bm = bm;
+        this.bm = Bitmap.createScaledBitmap(bm, height, height,false);
         this.action = action;
+        this.lossIfMissed = lossIfMissed;
     }
 
     //START Accessor Methods
@@ -33,6 +35,7 @@ public class Item {
     public int getY(){ return this.y; }
     public int getHeight(){ return this.height; }
     public Bitmap getBitmap(){ return this.bm; }
+    public boolean isLossIfMissed(){ return lossIfMissed; }
     //END Accessor Methods
 
     //Function: act()

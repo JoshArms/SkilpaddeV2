@@ -12,6 +12,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
 public class Turtle {
+    private final int OFFSET = 5; //offset when the turtle goes off the screen that way it doesn't look wonky
+
     private int speed; //speed the turtle will move at
     private Bitmap bm; //Bitmap for the Turtle
     private int x; //x-coordinate for the Turtle
@@ -54,7 +56,14 @@ public class Turtle {
         }else{
             this.bm =Bitmap.createScaledBitmap(BitmapFactory.decodeResource(g.getResources(), R.drawable.turtle_l), length, height, false);
         }
-        this.x += dir*this.speed;
+
+        this.x += dir*this.speed; //moves the turtle
+
+        if(this.x>Game.g.width){ //makes the turtle appear on the opposite side of the screen if it goes off
+            this.x = 0-this.length;
+        }else if(this.x + this.length + this.OFFSET < 0){
+            this.x = Game.g.width + this.OFFSET;
+        }
     }
 
     //Function: changeSpeed(int)

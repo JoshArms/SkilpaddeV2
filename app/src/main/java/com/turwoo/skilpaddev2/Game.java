@@ -25,16 +25,21 @@ import java.util.TimerTask;
 public class Game extends View {
     //START constant game vars
     private final int ITEM_SIZE = 50; //size of falling items
-    private final int DROP_RATE = 1500; //milliseconds until next drop at the start
+    private final int DROP_RATE = 1000; //milliseconds until next drop at the start
     private final int REFRESH_RATE = 10; //milliseconds until next draw refresh
-    private final int TURT_STARTING_SPEED = 5; //turtle starting speed
+    private final int TURT_STARTING_SPEED = 7; //turtle starting speed
     private final int ITEM_STARTING_SPEED = 5; //item starting speed;
-    private final int STARTING_Y = 100; //How far off the ground the turtle starts
+    private final int STARTING_Y = 200; //How far off the ground the turtle starts
     private final int TURTLE_HEIGHT = 100; //turtle height
     private final int TURTLE_WIDTH = 200; //turtle width
     private final int FIRST_SPECIAL_ITEM_INDEX = 5; //index of first item that doesn't cuase you to lose if missed
     private final int POINTS_DIS_LOC_Y = 50; //Y-coordinate of the points text
-    private final int POINTS_DIS_LOC_X = 100; //X-coordinate of the points text
+    private final int POINTS_DIS_LOC_X = 10; //X-coordinate of the points text
+    private final int TURT_SPEED_INCREASE = 1; //amount the turtle speed increases each time
+    private final int ITEM_SPEED_INCREASE = 1; //amount the item speed increases each time
+    private final int POINTS_PER_ITEM_INCREASE = 5; //number of points until item speed is increased
+    private final int POINTS_PER_TURT_INCREASE = 10; //number of points until turtle speed is increased
+    private final int TEXT_SIZE = 50; //text size
     //END constant game vars
     //START Constant Bitmaps
     private final Bitmap BACK = BitmapFactory.decodeResource(getResources(), R.drawable.background); //background img
@@ -52,6 +57,13 @@ public class Game extends View {
     private final Runnable addPoint = new Runnable() {
         public void run() {
             g.points++;
+            //update speeds
+            if(g.points%POINTS_PER_ITEM_INCREASE==0){
+                itemSpeed+=ITEM_SPEED_INCREASE;
+            }
+            if(g.points%POINTS_PER_TURT_INCREASE==0){
+                turt.changeSpeed(TURT_SPEED_INCREASE);
+            }
         }
     };
     //Runnable for when poison is collected
@@ -79,13 +91,13 @@ public class Game extends View {
     //START game vars
     public static Game g;
     private Bitmap background;
-    public int points; //Points collected during that game: static so runnables can access it
+    private int points; //Points collected during that game: static so runnables can access it
     private Turtle turt; //Turtle character in the game
     private ArrayList<Item> items;
     public int height; //height of screen
     public int width; //width of screen
-    public int itemSpeed; //speed of falling items
-    public boolean gameOver; //to know when to end the game
+    private int itemSpeed; //speed of falling items
+    private boolean gameOver; //to know when to end the game
     private int counter;
 
 
@@ -133,6 +145,7 @@ public class Game extends View {
 
         //Begin drawing
         Paint paint = new Paint(Color.BLACK);
+        paint.setTextSize(TEXT_SIZE);
         canvas.drawBitmap(background, 0, 0, paint);
         canvas.drawText("Points: "+points, POINTS_DIS_LOC_X, POINTS_DIS_LOC_Y, paint);
         canvas.drawBitmap(turt.getBitmap(), turt.getX(), turt.getY(), null);
@@ -155,6 +168,7 @@ public class Game extends View {
             MainActivity.main.setContentView(view);
         }
 
+        //add new item if it's time to
         counter += REFRESH_RATE;
         if (counter % DROP_RATE == 0) {
             counter = 0;
@@ -183,9 +197,8 @@ public class Game extends View {
 
     }
 
-    //Function: movementAndTime()
-    //Purpose: move all moving objects
-    //         This function also handles the timer to ensure everything keeps updating
+    //Function: time()
+    //Purpose: handle the timer
     //Parameters: none
     //Returns: nothing
     public void time() {

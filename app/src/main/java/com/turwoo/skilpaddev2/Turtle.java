@@ -1,3 +1,10 @@
+//************************************//
+// Turtle.java                        //
+//      by: Josh Arms                 //
+// Purpose: Turtle object for the     //
+//          Game class                //
+//************************************//
+
 package com.turwoo.skilpaddev2;
 
 import android.graphics.Bitmap;
@@ -61,8 +68,10 @@ public class Turtle {
     //Parameters: Item it: item to check if it is collecting
     //Returns: true if it is touching the item, else false
     public boolean collecting(Item it){
+        //rectangle for the item
         Rect itR = new Rect(it.getX(), it.getY(), it.getX()+it.getHeight(), it.getY()+it.getHeight());
+        //rectangle for the turtle
         Rect TurtR = new Rect(this.x,this.y,this.x+this.length,this.y+this.height);
-        return TurtR.intersect(itR);
+        return TurtR.intersect(itR); //if they intersect the turtle is collecting it
     }
 }

@@ -1,3 +1,10 @@
+//************************************//
+// MainActivity.java                  //
+//      by: Josh Arms                 //
+// Purpose: Main java class for the   //
+//          app                       //
+//************************************//
+
 package com.turwoo.skilpaddev2;
 
 import android.content.Context;

@@ -1,3 +1,10 @@
+//************************************//
+// Item.java                          //
+//      by: Josh Arms                 //
+// Purpose: Item object for the Game  //
+//          class                     //
+//************************************//
+
 package com.turwoo.skilpaddev2;
 
 import android.graphics.Bitmap;

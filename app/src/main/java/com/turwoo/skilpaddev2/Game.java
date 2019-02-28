@@ -1,3 +1,10 @@
+//************************************//
+// Game.java                          //
+//      by: Josh Arms                 //
+// Purpose: Handles the game portions //
+//          of the app                //
+//************************************//
+
 package com.turwoo.skilpaddev2;
 
 import android.content.Context;
@@ -8,7 +15,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 
+import com.turwoo.skilpaddev2.R;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,7 +32,7 @@ public class Game extends View {
     private final int STARTING_Y = 100; //How far off the ground the turtle starts
     private final int TURTLE_HEIGHT = 100; //turtle height
     private final int TURTLE_WIDTH = 200; //turtle width
-    private final int FIRST_SPECIAL_ITEM_INDEX = 6; //index of first item that doesn't cuase you to lose if missed
+    private final int FIRST_SPECIAL_ITEM_INDEX = 5; //index of first item that doesn't cuase you to lose if missed
     private final int POINTS_DIS_LOC_Y = 50; //Y-coordinate of the points text
     private final int POINTS_DIS_LOC_X = 100; //X-coordinate of the points text
     //END constant game vars
@@ -41,19 +51,19 @@ public class Game extends View {
     //Runnable for when a point is collected
     private final Runnable addPoint = new Runnable() {
         public void run() {
-            Game.points++;
+            g.points++;
         }
     };
     //Runnable for when poison is collected
     private final Runnable endGame = new Runnable() {
         public void run() {
-            Game.end();
+            g.end();
         }
     };
     //Runnable for when a coin is collected
     private final Runnable coinCollected = new Runnable() {
         public void run() {
-            Game.addCoin();
+            g.addCoin();
         }
     };
     //Possible actions for items. This is parallel to itemBms
@@ -67,16 +77,16 @@ public class Game extends View {
     //END Runnable Vars
 
     //START game vars
-    private static Bitmap background;
-    public static int points; //Points collected during that game: static so runnables can access it
+    public static Game g;
+    private Bitmap background;
+    public int points; //Points collected during that game: static so runnables can access it
     private Turtle turt; //Turtle character in the game
     private ArrayList<Item> items;
-    public static int height; //height of screen
-    public static int width; //width of screen
-    public static int itemSpeed; //speed of falling items
-    public static int turtSpeed; //speed of turtle
-    public static Game g;
-    public static boolean gameOver; //to know when to end the game
+    public int height; //height of screen
+    public int width; //width of screen
+    public int itemSpeed; //speed of falling items
+    public boolean gameOver; //to know when to end the game
+    private int counter;
 
 
     //Function Game(Context context)
@@ -85,8 +95,26 @@ public class Game extends View {
     //Returns: None
     public Game(Context context) {
         super(context);
-        //reset vars
-        points = 0;
+        //set vars
+        this.points = 0;
+        this.items = new ArrayList<>();
+        this.itemSpeed = ITEM_STARTING_SPEED;
+        this.gameOver = false;
+        this.counter = DROP_RATE - REFRESH_RATE;
+        Game.g = this;
+
+        this.time();
+    }
+    //Function: initVars()
+    //Purpose: To initialize variables that are dependent on the height or/and width
+    //Parameters: none
+    //Returns: none
+    public void initVars(){
+        background = Bitmap.createScaledBitmap(BACK, width, height, false);
+
+        Bitmap turtMap = BitmapFactory.decodeResource(getResources(), R.drawable.turtle_l);
+        turt = new Turtle(turtMap,TURTLE_WIDTH, height - STARTING_Y, TURTLE_HEIGHT, TURTLE_WIDTH, TURT_STARTING_SPEED);
+
     }
 
     //Function: onDraw(Canvas)
@@ -96,30 +124,61 @@ public class Game extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if(background==null){
+            height = canvas.getHeight();
+            width = canvas.getWidth();
+            initVars();
+        }
+        updateVars();
+
+        //Begin drawing
         Paint paint = new Paint(Color.BLACK);
-        background = Bitmap.createScaledBitmap(BACK, canvas.getWidth(), canvas.getHeight(), false);
         canvas.drawBitmap(background, 0, 0, paint);
-        //set vars
-        height = canvas.getHeight();
-        width = canvas.getWidth();
-        points = 0;
-        Bitmap turtMap = BitmapFactory.decodeResource(getResources(), R.drawable.turtle_l);
-        turt = new Turtle(turtMap,TURTLE_WIDTH, height - STARTING_Y, TURTLE_HEIGHT, TURTLE_WIDTH, TURT_STARTING_SPEED);
-        items = new ArrayList<>();
-        itemSpeed = ITEM_STARTING_SPEED;
-        turtSpeed = TURT_STARTING_SPEED;
-        g = this;
-        gameOver = false;
-
-
-        //play game
-        this.movementAndTime();
-
-        //draw game
         canvas.drawText("Points: "+points, POINTS_DIS_LOC_X, POINTS_DIS_LOC_Y, paint);
         canvas.drawBitmap(turt.getBitmap(), turt.getX(), turt.getY(), null);
+
         for (Item it : items) {
             canvas.drawBitmap(it.getBitmap(), it.getX(), it.getY(), null);
+        }
+
+    }
+    //Function: updateVars()
+    //Purpose: updates the object variables
+    //Parameters: none
+    //Returns: none
+    public void updateVars(){
+        if(gameOver){
+            //***
+            //Save scores
+            //***
+            View view = new Game(MainActivity.main); //this is overly simplified way to end it for current tests
+            MainActivity.main.setContentView(view);
+        }
+
+        counter += REFRESH_RATE;
+        if (counter % DROP_RATE == 0) {
+            counter = 0;
+            int randX = (int) Math.floor(Math.random() * (width - ITEM_SIZE));
+            int index = (int) Math.floor(Math.random() * (itemBms.length));
+            Item newItem = new Item(randX, 0 - ITEM_SIZE, ITEM_SIZE, itemSpeed, itemBms[index], itemActions[index], index < FIRST_SPECIAL_ITEM_INDEX);
+            items.add(newItem);
+        }
+
+        turt.move(g,MainActivity.dir); //move turtle
+
+        //move all items
+        Iterator<Item> it = items.iterator();
+        while(it.hasNext()){
+            Item curItem = it.next();
+            curItem.move();
+            if(curItem.getY() > height){ //if the item is off the screen
+                if(curItem.isLossIfMissed()){
+                    this.end();
+                }
+            } else if (turt.collecting(curItem)){ //if the turtle got the item
+                curItem.act();
+                it.remove();
+            }
         }
 
     }
@@ -129,51 +188,11 @@ public class Game extends View {
     //         This function also handles the timer to ensure everything keeps updating
     //Parameters: none
     //Returns: nothing
-    public void movementAndTime() {
+    public void time() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
-            int counter = DROP_RATE - REFRESH_RATE;
-
             public void run() {
-                MainActivity.main.runOnUiThread(new Runnable(){
-                    public void run(){
-                        if(gameOver){
-                            //***
-                            //Save scores
-                            //***
-                            View view = new Game(MainActivity.main); //this is overly simplified way to end it for current tests
-                            MainActivity.main.setContentView(view);
-                        }
-
-                        counter += REFRESH_RATE;
-                        if (counter % DROP_RATE == 0) {
-                            counter = 0;
-                            int randX = (int) Math.floor(Math.random() * (width - ITEM_SIZE));
-                            int index = (int) Math.floor(Math.random() * (itemBms.length));
-                            Item newItem = new Item(randX, 0 - ITEM_SIZE, ITEM_SIZE, itemSpeed, itemBms[index], itemActions[index], index < FIRST_SPECIAL_ITEM_INDEX);
-                            items.add(newItem);
-                        }
-
-                        turt.move(g,MainActivity.dir); //move turtle
-
-                        //move all items
-                        for (Item it: items) {
-                            it.move();
-                            //if the item is off the screen
-                            if (it.getY() > height) {
-                                if (it.isLossIfMissed()) {
-                                    end(); //ends game bc they lost
-                                }
-                                items.remove(it);
-                            } else if (turt.collecting(it)) { //if the turtle got the item
-                                it.act();
-                                items.remove(it);
-                            }
-                        }
-
-                        postInvalidate(); //tells it to draw again after finishing the last drawing
-                    }
-                });
+                postInvalidate(); //tells it to draw again after finishing the last drawing
             }
         }, 2000, REFRESH_RATE);
     }
@@ -182,7 +201,7 @@ public class Game extends View {
     //Purpose: Ends the game
     //Parameters: none
     //returns: nothing
-    public static void end() {
+    public void end() {
         gameOver = true;
     }
 
@@ -190,7 +209,7 @@ public class Game extends View {
     //Purpose: adds a coin to user's bank
     //Parameters: none
     //returns: nothing
-    public static void addCoin() {
+    public void addCoin() {
 
     }
 }

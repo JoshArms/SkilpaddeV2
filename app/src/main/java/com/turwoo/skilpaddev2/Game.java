@@ -44,11 +44,14 @@ public class Game extends View {
     private final int PAUSE_Y = 15; //y-coordinate for pause button
     private final int PAUSE_X = 15; //x-coordinate for pause button will equal (screen width - button width - PAUSE_X)
     private final int PAUSE_SIZE = 100; //width and height of the pause button
+    private final int REPLAY_HEIGHT = 150;
+    private final int REPLAY_MARGIN = 100;
     //END constant game vars
     //START Constant Bitmaps
     private final Bitmap BACK = BitmapFactory.decodeResource(getResources(), R.drawable.background); //background img
     private final Bitmap PAUSE_BM = BitmapFactory.decodeResource(getResources(), R.drawable.pause); //pause button
-    private final Bitmap START_BM = BitmapFactory.decodeResource(getResources(), R.drawable.start); //start button
+    private final Bitmap START_BM = BitmapFactory.decodeResource(getResources(), R.drawable.play); //start button
+    private final Bitmap REPLAY_BM = BitmapFactory.decodeResource(getResources(), R.drawable.replay); //replay button
     //Possible bitmaps for items. This is parallel to itemActions
     private final Bitmap[] itemBms = {BitmapFactory.decodeResource(getResources(), R.drawable.red),
             BitmapFactory.decodeResource(getResources(), R.drawable.orange),
@@ -109,6 +112,11 @@ public class Game extends View {
             initButtons();
         }
     };
+    private final Runnable REPLAY = new Runnable() {
+        public void run() {
+            MainActivity.main.setContentView(new Game(MainActivity.main));
+        }
+    };
     //END Button Runnables
 
     //START game vars
@@ -130,8 +138,6 @@ public class Game extends View {
     //Returns: None
     public Game(Context context) {
         super(context);
-        //Must be down to get rid of old buttons
-        Button.deactivateAll();
         //set vars
         this.points = 0;
         this.items = new ArrayList<>();
@@ -193,8 +199,10 @@ public class Game extends View {
             //***
             //Save scores
             //***
-            View view = new Game(MainActivity.main); //this is overly simplified way to end it for current tests
-            MainActivity.main.setContentView(view);
+            Button.deactivateAll();
+            paused = true;
+            int replayWidth = width - (2*REPLAY_MARGIN);
+            Button.activate(new Button(REPLAY_MARGIN, height/2, replayWidth, REPLAY_HEIGHT, REPLAY, REPLAY_BM ));
         }
 
         //add new item if it's time to
@@ -238,16 +246,14 @@ public class Game extends View {
                     postInvalidate(); //tells it to draw again after finishing the last drawing
                 }
             }
-        }, 2000, REFRESH_RATE);
+        }, 1000, REFRESH_RATE);
     }
 
     //Function: end()
     //Purpose: Ends the game
     //Parameters: none
     //returns: nothing
-    public void end() {
-        gameOver = true;
-    }
+    public void end() { gameOver = true; }
 
     //Function: addCoin()
     //Purpose: adds a coin to user's bank
@@ -283,7 +289,8 @@ public class Game extends View {
     //Parameters: none
     //Returns: none
     public void initButtons(){ //this is called after height and width of the screen have been determined
-        Button pauseBtn = new Button(PAUSE_X, PAUSE_Y, PAUSE_SIZE, PAUSE_SIZE, PAUSE, PAUSE_BM);
+        Button.deactivateAll();
+        Button pauseBtn = new Button(width - PAUSE_SIZE - PAUSE_X, PAUSE_Y, PAUSE_SIZE, PAUSE_SIZE, PAUSE, PAUSE_BM);
         Button.activate(pauseBtn);
     }
     //Function: activatePauseBtns()
@@ -291,7 +298,9 @@ public class Game extends View {
     //Parameters: none
     //Returns: none
     public void activatePauseBtns(){
-        Button startBtn = new Button(PAUSE_X, PAUSE_Y, PAUSE_SIZE, PAUSE_SIZE, START, START_BM);
+        Button.deactivateAll();
+        Button startBtn = new Button(width - PAUSE_SIZE - PAUSE_X, PAUSE_Y, PAUSE_SIZE, PAUSE_SIZE, START, START_BM);
         Button.activate(startBtn);
+        //probably add an exit/return to menu button
     }
 }

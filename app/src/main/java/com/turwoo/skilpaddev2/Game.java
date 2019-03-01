@@ -41,9 +41,14 @@ public class Game extends View {
     private final int POINTS_PER_ITEM_INCREASE = 5; //number of points until item speed is increased
     private final int POINTS_PER_TURT_INCREASE = 10; //number of points until turtle speed is increased
     private final int TEXT_SIZE = 50; //text size
+    private final int PAUSE_Y = 15; //y-coordinate for pause button
+    private final int PAUSE_X = 15; //x-coordinate for pause button will equal (screen width - button width - PAUSE_X)
+    private final int PAUSE_SIZE = 100; //width and height of the pause button
     //END constant game vars
     //START Constant Bitmaps
     private final Bitmap BACK = BitmapFactory.decodeResource(getResources(), R.drawable.background); //background img
+    private final Bitmap PAUSE_BM = BitmapFactory.decodeResource(getResources(), R.drawable.pause); //pause button
+    private final Bitmap START_BM = BitmapFactory.decodeResource(getResources(), R.drawable.start); //start button
     //Possible bitmaps for items. This is parallel to itemActions
     private final Bitmap[] itemBms = {BitmapFactory.decodeResource(getResources(), R.drawable.red),
             BitmapFactory.decodeResource(getResources(), R.drawable.orange),
@@ -89,6 +94,23 @@ public class Game extends View {
             endGame};
     //END Runnable Vars
 
+    //START Button Runnables
+    private final Runnable PAUSE = new Runnable() {
+        public void run() {
+            paused = true;
+
+            activatePauseBtns();
+        }
+    };
+    private final Runnable START = new Runnable() {
+        public void run() {
+            paused = false;
+            Button.deactivateAll();
+            initButtons();
+        }
+    };
+    //END Button Runnables
+
     //START game vars
     public static Game g;
     private Bitmap background;
@@ -100,7 +122,7 @@ public class Game extends View {
     private int itemSpeed; //speed of falling items
     private boolean gameOver; //to know when to end the game
     private int counter;
-
+    private boolean paused; //true if paused, else false
 
     //Function Game(Context context)
     //Purpose: Game constructor
@@ -117,6 +139,7 @@ public class Game extends View {
         this.gameOver = false;
         this.counter = DROP_RATE - REFRESH_RATE;
         Game.g = this;
+        this.paused = false;
 
         this.time();
     }
@@ -126,10 +149,9 @@ public class Game extends View {
     //Returns: none
     public void initVars(){
         background = Bitmap.createScaledBitmap(BACK, width, height, false);
-        addButtons();
         Bitmap turtMap = BitmapFactory.decodeResource(getResources(), R.drawable.turtle_l);
         turt = new Turtle(turtMap,TURTLE_WIDTH, height - STARTING_Y, TURTLE_HEIGHT, TURTLE_WIDTH, TURT_STARTING_SPEED);
-
+        initButtons();
     }
 
     //Function: onDraw(Canvas)
@@ -155,6 +177,10 @@ public class Game extends View {
 
         for (Item it : items) {
             canvas.drawBitmap(it.getBitmap(), it.getX(), it.getY(), null);
+        }
+
+        for(Button b: Button.getButtons()){
+            canvas.drawBitmap(b.getBitmap(), b.getX(), b.getY(), null);
         }
 
     }
@@ -208,7 +234,9 @@ public class Game extends View {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                postInvalidate(); //tells it to draw again after finishing the last drawing
+                if(!paused){
+                    postInvalidate(); //tells it to draw again after finishing the last drawing
+                }
             }
         }, 2000, REFRESH_RATE);
     }
@@ -250,11 +278,20 @@ public class Game extends View {
         }
         return true;
     }
-    //Function:
-    //Purpose:
-    //Parameters:
-    //Returns:
-    public void addButtons(){
-
+    //Function: initButtons()
+    //Purpose: initializes starting buttons
+    //Parameters: none
+    //Returns: none
+    public void initButtons(){ //this is called after height and width of the screen have been determined
+        Button pauseBtn = new Button(PAUSE_X, PAUSE_Y, PAUSE_SIZE, PAUSE_SIZE, PAUSE, PAUSE_BM);
+        Button.activate(pauseBtn);
+    }
+    //Function: activatePauseBtns()
+    //Purpose: initializes pause buttons
+    //Parameters: none
+    //Returns: none
+    public void activatePauseBtns(){
+        Button startBtn = new Button(PAUSE_X, PAUSE_Y, PAUSE_SIZE, PAUSE_SIZE, START, START_BM);
+        Button.activate(startBtn);
     }
 }

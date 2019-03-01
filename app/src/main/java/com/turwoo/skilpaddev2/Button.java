@@ -11,12 +11,12 @@ import android.graphics.Rect;
 import java.util.ArrayList;
 
 public class Button {
-    private Runnable action;
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private Bitmap bm;
+    private Runnable action; //what to do when clicked
+    private int x; //x-coordinate
+    private int y; //y-coordinate
+    private int width; //width of button
+    private int height; //height of button
+    private Bitmap bm; //bitmap for button
 
     private static ArrayList<Button> buttons;
 

@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.turwoo.skilpaddev2.R;
@@ -107,6 +108,8 @@ public class Game extends View {
     //Returns: None
     public Game(Context context) {
         super(context);
+        //Must be down to get rid of old buttons
+        Button.deactivateAll();
         //set vars
         this.points = 0;
         this.items = new ArrayList<>();
@@ -123,7 +126,7 @@ public class Game extends View {
     //Returns: none
     public void initVars(){
         background = Bitmap.createScaledBitmap(BACK, width, height, false);
-
+        addButtons();
         Bitmap turtMap = BitmapFactory.decodeResource(getResources(), R.drawable.turtle_l);
         turt = new Turtle(turtMap,TURTLE_WIDTH, height - STARTING_Y, TURTLE_HEIGHT, TURTLE_WIDTH, TURT_STARTING_SPEED);
 
@@ -223,6 +226,35 @@ public class Game extends View {
     //Parameters: none
     //returns: nothing
     public void addCoin() {
+
+    }
+
+    //Function: onTouchEvent(MotionEvent)
+    //Purpose: To handle when people touch buttons
+    //Parameters: MotionEvent event: the event that contains info on what happened
+    //Returns: true if completely successfully
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        int movement = event.getAction();
+
+        switch(movement){
+            case MotionEvent.ACTION_DOWN:
+                int x = (int)event.getX();
+                int y = (int)event.getY();
+                for(Button b: Button.getButtons()){
+                    if(b.isClicked(x,y)){
+                        b.act();
+                    }
+                }
+                break;
+        }
+        return true;
+    }
+    //Function:
+    //Purpose:
+    //Parameters:
+    //Returns:
+    public void addButtons(){
 
     }
 }

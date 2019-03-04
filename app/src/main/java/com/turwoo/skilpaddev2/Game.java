@@ -41,19 +41,22 @@ public class Game extends View {
     private final int POINTS_PER_ITEM_INCREASE = 5; //number of points until item speed is increased
     private final int POINTS_PER_TURT_INCREASE = 10; //number of points until turtle speed is increased
     private final int MIN_DROP_RATE = 500;
+    private final int MAX_ITEM_SPEED = 10;
     private final int DROP_RATE_CHANGE = 100;
     private final int TEXT_SIZE = 50; //text size
     private final int PAUSE_Y = 15; //y-coordinate for pause button
     private final int PAUSE_X = 15; //x-coordinate for pause button will equal (screen width - button width - PAUSE_X)
     private final int PAUSE_SIZE = 100; //width and height of the pause button
-    private final int REPLAY_HEIGHT = 150;
-    private final int REPLAY_MARGIN = 100;
+    private final int BTN_ROWS = MainMenu.ROWS;
+    private final int BUTTON_MARGINS = MainMenu.BUTTON_MARGINS;
+    private final int EXIT_ROW = MainMenu.START_ROW;
     //END constant game vars
     //START Constant Bitmaps
     private final Bitmap BACK = BitmapFactory.decodeResource(getResources(), R.drawable.background); //background img
     private final Bitmap PAUSE_BM = BitmapFactory.decodeResource(getResources(), R.drawable.pause); //pause button
     private final Bitmap START_BM = BitmapFactory.decodeResource(getResources(), R.drawable.play); //start button
     private final Bitmap REPLAY_BM = BitmapFactory.decodeResource(getResources(), R.drawable.replay); //replay button
+    private final Bitmap EXIT_BM = BitmapFactory.decodeResource(getResources(), R.drawable.back); //Exit button
     //Possible bitmaps for items. This is parallel to itemActions
     private final Bitmap[] itemBms = {BitmapFactory.decodeResource(getResources(), R.drawable.red),
             BitmapFactory.decodeResource(getResources(), R.drawable.orange),
@@ -70,7 +73,9 @@ public class Game extends View {
             g.points++;
             //update speeds
             if(g.points%POINTS_PER_ITEM_INCREASE==0){
-                itemSpeed+=ITEM_SPEED_INCREASE;
+                if(itemSpeed < MAX_ITEM_SPEED){
+                    itemSpeed+=ITEM_SPEED_INCREASE;
+                }
                 if(dropRate > MIN_DROP_RATE){
                     dropRate-=DROP_RATE_CHANGE;
                 }
@@ -115,6 +120,11 @@ public class Game extends View {
             paused = false;
             Button.deactivateAll();
             initButtons();
+        }
+    };
+    private final Runnable EXIT = new Runnable() {
+        public void run() {
+            MainActivity.main.setContentView(new MainMenu(MainActivity.main));
         }
     };
     private final Runnable REPLAY = new Runnable() {
@@ -208,8 +218,10 @@ public class Game extends View {
             //***
             Button.deactivateAll();
             paused = true;
-            int replayWidth = width - (2*REPLAY_MARGIN);
-            Button.activate(new Button(REPLAY_MARGIN, height/2, replayWidth, REPLAY_HEIGHT, REPLAY, REPLAY_BM ));
+            int btnWidths = width - (2*BUTTON_MARGINS);
+            int btnHeights = height/BTN_ROWS;
+            Button.activate(new Button(BUTTON_MARGINS, ((height/BTN_ROWS)*(EXIT_ROW-1))+BUTTON_MARGINS, btnWidths, btnHeights, REPLAY, REPLAY_BM ));
+            Button.activate(new Button(BUTTON_MARGINS, ((height/BTN_ROWS)*EXIT_ROW)+BUTTON_MARGINS, btnWidths, btnHeights, EXIT, EXIT_BM));
         }
 
         //add new item if it's time to
@@ -308,6 +320,7 @@ public class Game extends View {
         Button.deactivateAll();
         Button startBtn = new Button(width - PAUSE_SIZE - PAUSE_X, PAUSE_Y, PAUSE_SIZE, PAUSE_SIZE, START, START_BM);
         Button.activate(startBtn);
-        //probably add an exit/return to menu button
+        Button exitBtn = new Button(BUTTON_MARGINS, (height/BTN_ROWS)*EXIT_ROW+BUTTON_MARGINS, width-(2*BUTTON_MARGINS), height/BTN_ROWS, EXIT, EXIT_BM);
+        Button.activate(exitBtn);
     }
 }

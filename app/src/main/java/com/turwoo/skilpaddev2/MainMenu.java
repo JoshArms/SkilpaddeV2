@@ -16,9 +16,9 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class MainMenu extends View {
-    private final int BUTTON_MARGINS = 50;
-    private final int ROWS = 7;
-    private final int START_ROW = 5;
+    public final static int BUTTON_MARGINS = 50;
+    public final static int ROWS = 7;
+    public final static int START_ROW = 5;
 
     private final Bitmap START = BitmapFactory.decodeResource(getResources(), R.drawable.start);
     private final Bitmap BACKGROUND = BitmapFactory.decodeResource(getResources(), R.drawable.background);

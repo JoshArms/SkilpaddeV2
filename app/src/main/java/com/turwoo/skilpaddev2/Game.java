@@ -26,7 +26,7 @@ import java.util.TimerTask;
 public class Game extends View {
     //START constant game vars
     private final int ITEM_SIZE = 50; //size of falling items
-    private final int DROP_RATE = 1000; //milliseconds until next drop at the start
+    private final int STARTING_DROP_RATE = 1000; //milliseconds until next drop at the start
     private final int REFRESH_RATE = 10; //milliseconds until next draw refresh
     private final int TURT_STARTING_SPEED = 7; //turtle starting speed
     private final int ITEM_STARTING_SPEED = 5; //item starting speed;
@@ -40,6 +40,8 @@ public class Game extends View {
     private final int ITEM_SPEED_INCREASE = 1; //amount the item speed increases each time
     private final int POINTS_PER_ITEM_INCREASE = 5; //number of points until item speed is increased
     private final int POINTS_PER_TURT_INCREASE = 10; //number of points until turtle speed is increased
+    private final int MIN_DROP_RATE = 500;
+    private final int DROP_RATE_CHANGE = 100;
     private final int TEXT_SIZE = 50; //text size
     private final int PAUSE_Y = 15; //y-coordinate for pause button
     private final int PAUSE_X = 15; //x-coordinate for pause button will equal (screen width - button width - PAUSE_X)
@@ -69,6 +71,9 @@ public class Game extends View {
             //update speeds
             if(g.points%POINTS_PER_ITEM_INCREASE==0){
                 itemSpeed+=ITEM_SPEED_INCREASE;
+                if(dropRate > MIN_DROP_RATE){
+                    dropRate-=DROP_RATE_CHANGE;
+                }
             }
             if(g.points%POINTS_PER_TURT_INCREASE==0){
                 turt.changeSpeed(TURT_SPEED_INCREASE);
@@ -131,6 +136,7 @@ public class Game extends View {
     private boolean gameOver; //to know when to end the game
     private int counter;
     private boolean paused; //true if paused, else false
+    private int dropRate;
 
     //Function Game(Context context)
     //Purpose: Game constructor
@@ -143,9 +149,10 @@ public class Game extends View {
         this.items = new ArrayList<>();
         this.itemSpeed = ITEM_STARTING_SPEED;
         this.gameOver = false;
-        this.counter = DROP_RATE - REFRESH_RATE;
+        this.counter = STARTING_DROP_RATE - REFRESH_RATE;
         Game.g = this;
         this.paused = false;
+        this.dropRate = STARTING_DROP_RATE;
 
         this.time();
     }
@@ -207,7 +214,7 @@ public class Game extends View {
 
         //add new item if it's time to
         counter += REFRESH_RATE;
-        if (counter % DROP_RATE == 0) {
+        if (counter >= this.dropRate) {
             counter = 0;
             int randX = (int) Math.floor(Math.random() * (width - ITEM_SIZE));
             int index = (int) Math.floor(Math.random() * (itemBms.length));

@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         main = this;
 
-        View view = new Game(this);
+        View view = new MainMenu(this);
         setContentView(view); //sets the game to start
         //NO ACTION BAR
         ActionBar actionBar = getSupportActionBar();
@@ -79,9 +79,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             dir = 1.25;//"fast right";
         }else if(x>dX+1.25) {
             dir = -1.25;//"fast left";
-        }else if(x<dX-.85){
+        }else if(x<dX-.95){
             dir = 1;//"right";
-        }else if(x>dX+.85){
+        }else if(x>dX+.95){
             dir = -1;//"left";
         }else{
             dir = 0;//"still";

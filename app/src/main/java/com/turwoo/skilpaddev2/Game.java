@@ -49,7 +49,9 @@ public class Game extends View {
     private final int PAUSE_SIZE = 100; //width and height of the pause button
     private final int BTN_ROWS = MainMenu.ROWS;
     private final int BUTTON_MARGINS = MainMenu.BUTTON_MARGINS;
-    private final int EXIT_ROW = MainMenu.START_ROW;
+    private final int EXIT_ROW = 5;
+    private final int COOKIE_SPEED_BOOST = 7;
+    private final int COOKIE_EFFECT_TIME = 5000; //5 seconds
     //END constant game vars
     //START Constant Bitmaps
     private final Bitmap BACK = BitmapFactory.decodeResource(getResources(), R.drawable.background); //background img
@@ -64,6 +66,7 @@ public class Game extends View {
             BitmapFactory.decodeResource(getResources(), R.drawable.green),
             BitmapFactory.decodeResource(getResources(), R.drawable.blue),
             BitmapFactory.decodeResource(getResources(), R.drawable.coin),
+            BitmapFactory.decodeResource(getResources(), R.drawable.cookie),
             BitmapFactory.decodeResource(getResources(), R.drawable.poison)};
     //END Constant Bitmaps
     //START Runnable vars
@@ -97,6 +100,23 @@ public class Game extends View {
             g.addCoin();
         }
     };
+    //Runnable for when a cookie is collected
+    private final Runnable cookieCollected = new Runnable() {
+        public void run() {
+            if(!powerUp){
+                turt.changeSpeed(COOKIE_SPEED_BOOST);
+                powerUp = true;
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        turt.changeSpeed(-COOKIE_SPEED_BOOST);
+                        powerUp = false;
+                    }
+                }, COOKIE_EFFECT_TIME);
+            }
+        }
+    };
     //Possible actions for items. This is parallel to itemBms
     private final Runnable[] itemActions = {addPoint,
             addPoint,
@@ -104,6 +124,7 @@ public class Game extends View {
             addPoint,
             addPoint,
             coinCollected,
+            cookieCollected,
             endGame};
     //END Runnable Vars
 
@@ -147,6 +168,7 @@ public class Game extends View {
     private int counter;
     private boolean paused; //true if paused, else false
     private int dropRate;
+    private boolean powerUp;
 
     //Function Game(Context context)
     //Purpose: Game constructor
@@ -163,6 +185,7 @@ public class Game extends View {
         Game.g = this;
         this.paused = false;
         this.dropRate = STARTING_DROP_RATE;
+        this.powerUp = false;
 
         this.time();
     }
@@ -220,7 +243,7 @@ public class Game extends View {
             paused = true;
             int btnWidths = width - (2*BUTTON_MARGINS);
             int btnHeights = height/BTN_ROWS;
-            Button.activate(new Button(BUTTON_MARGINS, ((height/BTN_ROWS)*(EXIT_ROW-1))+BUTTON_MARGINS, btnWidths, btnHeights, REPLAY, REPLAY_BM ));
+            Button.activate(new Button(BUTTON_MARGINS, ((height/BTN_ROWS)*(EXIT_ROW-1)), btnWidths, btnHeights, REPLAY, REPLAY_BM ));
             Button.activate(new Button(BUTTON_MARGINS, ((height/BTN_ROWS)*EXIT_ROW)+BUTTON_MARGINS, btnWidths, btnHeights, EXIT, EXIT_BM));
         }
 
@@ -285,7 +308,7 @@ public class Game extends View {
     //Function: onTouchEvent(MotionEvent)
     //Purpose: To handle when people touch buttons
     //Parameters: MotionEvent event: the event that contains info on what happened
-    //Returns: true if completely successfully
+    //Returns: true
     @Override
     public boolean onTouchEvent(MotionEvent event){
         int movement = event.getAction();

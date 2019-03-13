@@ -42,8 +42,6 @@ public class Turtle {
     public Bitmap getBitmap(){ return bm; }
     public int getX(){ return x; }
     public int getY(){ return y; }
-    public int getHeight(){ return height; }
-    public int getLength(){ return length; }
     //END Accessor Methods
 
     //Function: move(int)
@@ -65,7 +63,17 @@ public class Turtle {
             this.x = Game.g.width + this.OFFSET;
         }
     }
+/* this is for the jet pack idea in the future
+    public void moveY(Game g, double dir, int bottom){
+        if(!(this.y + height >= bottom || this.y >= 0)){
+            this.y += dir*this.speed; //moves the turtle up and down
+        }
+    }
 
+    public void fall(int bottom){
+        //accelerate done
+    }
+*/
     //Function: changeSpeed(int)
     //Purpose: changes the speed
     //Parameter: int change: the amount to add to speed
